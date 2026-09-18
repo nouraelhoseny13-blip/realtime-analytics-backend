@@ -1,0 +1,13 @@
+﻿.env
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.db
+*.sqlite3
+app/postgresql-17.11-3-windows-x64.exe
