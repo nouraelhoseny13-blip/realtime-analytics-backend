@@ -1,8 +1,11 @@
-﻿import os
+import os
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from app.db.database import Base, engine
+from app import models
 
 from app.api.routes.analytics import router as analytics_router
 from app.api.routes.auth import router as auth_router
@@ -31,6 +34,11 @@ app = FastAPI(
     title="Real-Time Analytics API",
     version="1.0.0",
 )
+
+
+@app.on_event("startup")
+def create_database_tables():
+    Base.metadata.create_all(bind=engine)
 
 
 app.add_middleware(
