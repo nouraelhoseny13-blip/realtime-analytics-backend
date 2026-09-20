@@ -1,4 +1,3 @@
-```python
 from datetime import datetime
 
 from sqlalchemy import Boolean, DateTime, Float, Integer, String
@@ -11,6 +10,7 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(
+        Integer,
         primary_key=True,
         index=True,
         autoincrement=True,
@@ -50,8 +50,10 @@ class Analytics(Base):
     __tablename__ = "analytics"
 
     id: Mapped[int] = mapped_column(
+        Integer,
         primary_key=True,
         index=True,
+        autoincrement=True,
     )
 
     timestamp: Mapped[datetime] = mapped_column(
@@ -106,8 +108,10 @@ class Activity(Base):
     __tablename__ = "activities"
 
     id: Mapped[int] = mapped_column(
+        Integer,
         primary_key=True,
         index=True,
+        autoincrement=True,
     )
 
     service: Mapped[str] = mapped_column(
@@ -141,8 +145,10 @@ class Notification(Base):
     __tablename__ = "notifications"
 
     id: Mapped[int] = mapped_column(
+        Integer,
         primary_key=True,
         index=True,
+        autoincrement=True,
     )
 
     title: Mapped[str] = mapped_column(
@@ -171,4 +177,3 @@ class Notification(Base):
         nullable=False,
         index=True,
     )
-```
