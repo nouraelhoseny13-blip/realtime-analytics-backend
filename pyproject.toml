@@ -10,7 +10,7 @@ dependencies = [
     "psycopg[binary]",
     "python-dotenv",
     "python-jose",
-    "passlib[bcrypt]",
+    "pwdlib[argon2]",
 ]
 
 [tool.fastapi]
