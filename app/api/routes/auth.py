@@ -1,12 +1,5 @@
-from fastapi import (
-    APIRouter,
-    Depends,
-    HTTPException,
-)
-from fastapi.security import (
-    HTTPAuthorizationCredentials,
-    HTTPBearer,
-)
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -14,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.core.security import (
     create_access_token,
     decode_access_token,
+    hash_password,
     verify_password,
 )
 from app.db.database import get_db
@@ -34,6 +28,12 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class RegisterRequest(BaseModel):
+    name: str
+    email: str
+    password: str
+
+
 class User(BaseModel):
     id: str
     name: str
@@ -47,9 +47,7 @@ class LoginResponse(BaseModel):
 
 
 def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(
-        security
-    ),
+    credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db),
 ):
     token = credentials.credentials
@@ -81,9 +79,7 @@ def get_current_user(
 
     user = (
         db.query(UserModel)
-        .filter(
-            UserModel.id == user_id
-        )
+        .filter(UserModel.id == user_id)
         .first()
     )
 
@@ -103,6 +99,66 @@ def get_current_user(
 
 
 @router.post(
+    "/register",
+    response_model=LoginResponse,
+)
+def register(
+    data: RegisterRequest,
+    db: Session = Depends(get_db),
+):
+    email = data.email.strip().lower()
+    name = data.name.strip()
+
+    if len(data.password) < 8:
+        raise HTTPException(
+            status_code=400,
+            detail="Password must be at least 8 characters long.",
+        )
+
+    existing_user = (
+        db.query(UserModel)
+        .filter(UserModel.email == email)
+        .first()
+    )
+
+    if existing_user:
+        raise HTTPException(
+            status_code=409,
+            detail="An account with this email already exists.",
+        )
+
+    user = UserModel(
+        name=name,
+        email=email,
+        password_hash=hash_password(data.password),
+        role="viewer",
+        is_active=True,
+    )
+
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    access_token = create_access_token(
+        {
+            "sub": str(user.id),
+            "email": user.email,
+            "role": user.role,
+        }
+    )
+
+    return {
+        "user": {
+            "id": str(user.id),
+            "name": user.name,
+            "email": user.email,
+            "role": user.role,
+        },
+        "accessToken": access_token,
+    }
+
+
+@router.post(
     "/login",
     response_model=LoginResponse,
 )
@@ -110,11 +166,11 @@ def login(
     data: LoginRequest,
     db: Session = Depends(get_db),
 ):
+    email = data.email.strip().lower()
+
     user = (
         db.query(UserModel)
-        .filter(
-            UserModel.email == data.email
-        )
+        .filter(UserModel.email == email)
         .first()
     )
 
@@ -163,9 +219,7 @@ def login(
     response_model=User,
 )
 def get_current_user_info(
-    current_user: UserModel = Depends(
-        get_current_user
-    ),
+    current_user: UserModel = Depends(get_current_user),
 ):
     return {
         "id": str(current_user.id),

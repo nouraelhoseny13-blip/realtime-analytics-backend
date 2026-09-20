@@ -16,16 +16,20 @@ from app.api.routes.websocket import router as websocket_router
 
 load_dotenv()
 
+
 FRONTEND_URL = os.getenv(
     "FRONTEND_URL",
     "http://localhost:5173",
 )
 
+
 ALLOWED_ORIGINS = [
     FRONTEND_URL,
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "https://realtime-analytics-dashboard-theta.vercel.app",
 ]
+
 
 ALLOWED_ORIGINS = list(dict.fromkeys(ALLOWED_ORIGINS))
 
