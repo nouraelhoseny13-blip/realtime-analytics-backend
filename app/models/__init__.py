@@ -1,3 +1,4 @@
+```python
 from datetime import datetime
 
 from sqlalchemy import Boolean, DateTime, Float, Integer, String
@@ -12,6 +13,7 @@ class User(Base):
     id: Mapped[int] = mapped_column(
         primary_key=True,
         index=True,
+        autoincrement=True,
     )
 
     email: Mapped[str] = mapped_column(
@@ -169,3 +171,4 @@ class Notification(Base):
         nullable=False,
         index=True,
     )
+```
